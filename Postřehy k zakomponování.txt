@@ -1,0 +1,12 @@
+Proč Streamlit?
+
+Je to Python (nemusíš se teď učit React nebo složité JavaScript frameworky).
+
+Je to extrémně rychlé na prototypování (ideální pro "minimální hratelný prototyp" ).
+
+Vykreslí UI (tlačítka, texty, grafy) automaticky.
+
+
+
+
+Ta moje chess engine servisa - da se k tomu kontejneru přimo připojit a otestovat jestli šlape.

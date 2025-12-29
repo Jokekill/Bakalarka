@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # 1. Backend - Engine
+  r-chess-engine:
+    build: ./r-chess-engine-service  # Pozor: musí sedět s názvem složky!
+    container_name: r-chess-engine
+    ports:
+      - "8000:8000"
+    networks:
+      - r-chess-net
+
+  # 2. Frontend - Streamlit
+  r-chess-frontend:
+    build: ./r-chess-frontend
+    container_name: r-chess-frontend
+    ports:
+      - "8501:8501"
+    depends_on:
+      - r-chess-engine
+    environment:
+      # Odkazujeme na nový název kontejneru 'r-chess-engine'
+      - ENGINE_API_URL=http://r-chess-engine:8000/analyze
+    networks:
+      - r-chess-net
+
+# Sjednocená síť
+networks:
+  r-chess-net:
+    driver: bridge
