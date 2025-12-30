@@ -10,3 +10,11 @@ Vykreslí UI (tlačítka, texty, grafy) automaticky.
 
 
 Ta moje chess engine servisa - da se k tomu kontejneru přimo připojit a otestovat jestli šlape.
+
+
+https://chessboardjs.com/examples#2006 - krasna webovka a dokumentace k javascript šachovnici
+
+
+https://github.com/lichess-org/chessground-examples
+https://codesandbox.io/examples/package/chessground
+https://nicegui.io/documentation/
