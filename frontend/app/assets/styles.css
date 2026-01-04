@@ -1,6 +1,6 @@
 :root {
-  --gap: 16px;
-  --board: 520px;
+  --gap: 24px;
+  --board: 560px;
   --header-h: 56px;
   --bg: #f6f7f9;
   --card: #ffffff;
@@ -18,6 +18,7 @@ body {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
+/* Header */
 .app-header {
   height: var(--header-h);
   background: var(--card);
@@ -34,32 +35,41 @@ body {
   font-size: 12px;
 }
 
+/* Centered layout */
 .app-shell {
-  padding: 16px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px;
 }
 
+/* Wider two-column grid */
 .app-grid {
+  width: min(1600px, 100%);
   display: grid;
-  grid-template-columns: minmax(420px, var(--board)) minmax(360px, 1fr);
+  grid-template-columns: minmax(calc(var(--board) + 48px), 1fr) minmax(640px, 1fr);
   gap: var(--gap);
   align-items: start;
 
-  /* only the right panel scrolls; left stays visible */
-  height: calc(100vh - var(--header-h) - 32px);
+  /* Keep right panel scrollable; left panel stays visible */
+  height: calc(100vh - var(--header-h) - 48px);
 }
 
+/* Left stays sticky */
 .left-panel {
   position: sticky;
   top: calc(var(--header-h) + 16px);
   align-self: start;
 }
 
+/* Right scrolls */
 .right-panel {
-  height: calc(100vh - var(--header-h) - 32px);
+  height: calc(100vh - var(--header-h) - 48px);
   overflow: auto;
   padding-right: 8px;
 }
 
+/* Cards */
 .panel-card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -73,19 +83,20 @@ body {
   margin-bottom: 8px;
 }
 
+/* Chessboard container */
 .cg-board {
-  width: var(--board);
-  height: var(--board);
-  max-width: 95vw;
-  max-height: 95vw;
+  width: min(var(--board), 95vw);
+  height: min(var(--board), 95vw);
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--border);
 }
 
-/* Spare pieces */
+/* Spare pieces rows */
 .spare-pieces {
   display: flex;
+  width: 100%;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 8px;
   padding: 6px 2px;
@@ -93,8 +104,8 @@ body {
 
 /* q-img wrapper */
 .spare-piece {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 10px;
   border: 1px solid transparent;
   background: rgba(15, 23, 42, 0.03);
@@ -129,8 +140,9 @@ body {
   color: #ffffff !important;
 }
 
-@media (max-width: 1100px) {
-  :root { --board: 480px; }
+/* Responsive: stack columns */
+@media (max-width: 1280px) {
+  :root { --board: 520px; }
   .app-grid {
     grid-template-columns: 1fr;
     height: auto;
@@ -148,40 +160,3 @@ body {
 @media (max-width: 520px) {
   :root { --board: 92vw; }
 }
-
-/* vycentrování celého layoutu */
-.app-shell{
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  padding: 24px 16px;
-}
-
-/* širší 2-sloupcový grid */
-.app-grid{
-  width: min(1600px, 100%);
-  display: grid;
-  grid-template-columns: minmax(560px, 1fr) minmax(560px, 1fr);
-  gap: 24px;
-  align-items: start;
-}
-
-/* mobil / menší šířky -> sloupce pod sebe */
-@media (max-width: 1200px){
-  .app-grid{
-    grid-template-columns: 1fr;
-  }
-}
-
-/* aby se palety hezky skládaly */
-.spare-pieces{
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-/* velikost figurek v paletě (uprav dle chuti) */
-.spare-piece{
-  width: 34px;
-  height: 34px;
-}
-

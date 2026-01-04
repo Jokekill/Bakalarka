@@ -17,8 +17,8 @@ from .chessground import DEFAULT_PLACEMENT, ROLE_MAP, piece_svg
 @dataclass
 class AppState:
     editor_placement: str = DEFAULT_PLACEMENT
-    game_board: chess.Board = field(default_factory=chess.Board)   # FIX: default_factory
-    score_history: List[int] = field(default_factory=list)         # FIX: default_factory
+    game_board: chess.Board = field(default_factory=chess.Board)
+    score_history: List[int] = field(default_factory=list)
 
 
 async def js(client, code: str) -> None:
@@ -36,6 +36,24 @@ def build_ui() -> None:
     self_play = SelfPlayController()
 
     # -------------------------
+    # Editor helpers (MUST exist before buttons)
+    # -------------------------
+    async def reset_start() -> None:
+        client = ui.context.client
+        state.editor_placement = DEFAULT_PLACEMENT
+        await js(client, f"window.cgSetFen({json.dumps(DEFAULT_PLACEMENT)});")
+
+    async def reset_empty() -> None:
+        client = ui.context.client
+        empty = "8/8/8/8/8/8/8/8"
+        state.editor_placement = empty
+        await js(client, f"window.cgSetFen({json.dumps(empty)});")
+
+    async def flip_board() -> None:
+        client = ui.context.client
+        await js(client, "window.cgToggleOrientation();")
+
+    # -------------------------
     # Header
     # -------------------------
     with ui.header().classes('app-header'):
@@ -50,13 +68,13 @@ def build_ui() -> None:
         with ui.element('div').classes('app-grid'):
 
             # =========================
-            # LEFT PANEL (board/editor)
+            # LEFT PANEL (board + palettes only)
             # =========================
             with ui.element('div').classes('left-panel'):
                 with ui.card().classes('panel-card'):
                     ui.label('Editor pozice').classes('card-title')
 
-                    # ČERNÉ NAD ŠACHOVNICÍ
+                    # BLACK palette ABOVE the board
                     ui.label('Černé (táhni na šachovnici)').classes('text-caption')
                     with ui.row().classes('spare-pieces justify-center'):
                         for p, role in ROLE_MAP.items():
@@ -67,12 +85,12 @@ def build_ui() -> None:
 
                     ui.separator().classes('my-2')
 
-                    # ŠACHOVNICE
+                    # BOARD
                     ui.html('<div id="cg-board" class="cg-board"></div>', sanitize=False)
 
                     ui.separator().classes('my-2')
 
-                    # BÍLÉ POD ŠACHOVNICÍ
+                    # WHITE palette BELOW the board
                     ui.label('Bílé (táhni na šachovnici)').classes('text-caption')
                     with ui.row().classes('spare-pieces justify-center'):
                         for p, role in ROLE_MAP.items():
@@ -81,14 +99,11 @@ def build_ui() -> None:
                                 .props('no-spinner') \
                                 .on('mousedown', js_handler=f'(e) => window.startDragNewPiece("white", "{role}", e)')
 
-                    # Ovládání editoru
+                    # Editor buttons
                     with ui.row().classes('w-full gap-2 mt-3'):
                         ui.button('Základ', on_click=reset_start).classes('btn-ghost')
                         ui.button('Prázdná', on_click=reset_empty).classes('btn-ghost')
                         ui.button('Otočit', on_click=flip_board).classes('btn-ghost')
-
-
-
 
             # =========================
             # RIGHT PANEL (controls/output)
@@ -258,10 +273,9 @@ def build_ui() -> None:
                         ui.button('Zahrát tah', on_click=play_one_best_move).classes('btn-ghost grow')
                         ui.button('Start/Stop self-play', on_click=toggle_self_play).classes('btn-danger grow')
 
-
-                # FEN params in an expansion (reduces scrolling)
+                # FEN applicator - RIGHT COLUMN, BOTTOM, hidden by default
                 with ui.card().classes('panel-card mt-3'):
-                    with ui.expansion('FEN parametry + aplikovat do hry', value=False).classes('w-full'):
+                    with ui.expansion('FEN aplikátor (pokročilé)', value=False).classes('w-full'):
                         turn = ui.radio({'w': 'Bílý na tahu', 'b': 'Černý na tahu'}, value='w').props('inline')
                         castling = ui.input('Rokáda (KQkq / -)', value='-').classes('mono')
                         ep = ui.input('En-passant (e3 / -)', value='-').classes('mono')
@@ -307,5 +321,3 @@ def build_ui() -> None:
                                 ui.notify(f'Neplatný FEN: {ex}', type='negative')
 
                         ui.button('Aplikovat editor → hra', on_click=apply_editor_to_game).classes('btn-primary w-full mt-2')
-
-                
