@@ -165,3 +165,23 @@ body {
 @media (max-width: 520px) {
   :root { --board: 92vw; }
 }
+
+
+/* 1) Zajisti, že wrapper pro ui.html v levém panelu má plnou šířku */
+.left-panel .nicegui-html{
+  width: 100%;
+  display: block;
+}
+
+/* 2) Centrovat samotný wrapper šachovnice */
+.cg-board{
+  display: block;
+  margin: 0 auto;
+}
+
+/* 3) Volitelné, ale praktické: vnitřní cg-container ať se drží wrapperu
+      (pomáhá při responsivních šířkách / kdy inline style z chessgroundu nesedí) */
+.cg-board cg-container{
+  width: 100% !important;
+  height: 100% !important;
+}
