@@ -140,6 +140,10 @@ body {
   color: #ffffff !important;
 }
 
+.c22 {
+  margin: auto;
+}
+
 /* Responsive: stack columns */
 @media (max-width: 1280px) {
   :root { --board: 520px; }

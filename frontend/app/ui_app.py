@@ -83,12 +83,9 @@ def build_ui() -> None:
                                 .props('no-spinner') \
                                 .on('mousedown', js_handler=f'(e) => window.startDragNewPiece("black", "{role}", e)')
 
-                    ui.separator().classes('my-2')
-
                     # BOARD
                     ui.html('<div id="cg-board" class="cg-board"></div>', sanitize=False)
 
-                    ui.separator().classes('my-2')
 
                     # WHITE palette BELOW the board
                     ui.label('Bílé (táhni na šachovnici)').classes('text-caption')
