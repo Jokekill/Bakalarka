@@ -55,94 +55,40 @@ def build_ui() -> None:
             with ui.element('div').classes('left-panel'):
                 with ui.card().classes('panel-card'):
                     ui.label('Editor pozice').classes('card-title')
-                    ui.html('<div id="cg-board" class="cg-board"></div>', sanitize=False)
 
-                    with ui.row().classes('w-full gap-2 mt-2'):
-                        async def reset_start() -> None:
-                            client = ui.context.client
-                            await js(client, f"window.cgSetFen({json.dumps(DEFAULT_PLACEMENT)});")
-
-                        async def reset_empty() -> None:
-                            client = ui.context.client
-                            await js(client, "window.cgSetFen('8/8/8/8/8/8/8/8');")
-
-                        async def flip_board() -> None:
-                            client = ui.context.client
-                            await js(client, "window.cgToggleOrientation();")
-
-                        ui.button('Základ', on_click=reset_start).classes('btn-ghost')
-                        ui.button('Prázdná', on_click=reset_empty).classes('btn-ghost')
-                        ui.button('Otočit', on_click=flip_board).classes('btn-ghost')
-
-                # Palette in an expansion to save vertical space
-                with ui.card().classes('panel-card mt-3'):
-                    with ui.expansion('Paleta figur (spare pieces)', value=False).classes('w-full'):
-                        ui.label('Bílé').classes('text-caption')
-                        with ui.row().classes('spare-pieces'):
-                            for p, role in ROLE_MAP.items():
-                                ui.image(piece_svg('w', p)) \
-                                .classes('spare-piece') \
-                                .props('no-spinner') \
-                                .on('mousedown', js_handler=f'(e) => window.startDragNewPiece("white", "{role}", e)')
-
-                        ui.separator()
-                        ui.label('Černé').classes('text-caption')
-                        with ui.row().classes('spare-pieces'):
-                            for p, role in ROLE_MAP.items():
-                                ui.image(piece_svg('b', p)) \
+                    # ČERNÉ NAD ŠACHOVNICÍ
+                    ui.label('Černé (táhni na šachovnici)').classes('text-caption')
+                    with ui.row().classes('spare-pieces justify-center'):
+                        for p, role in ROLE_MAP.items():
+                            ui.image(piece_svg('b', p)) \
                                 .classes('spare-piece') \
                                 .props('no-spinner') \
                                 .on('mousedown', js_handler=f'(e) => window.startDragNewPiece("black", "{role}", e)')
 
+                    ui.separator().classes('my-2')
 
-                # FEN params in an expansion (reduces scrolling)
-                with ui.card().classes('panel-card mt-3'):
-                    with ui.expansion('FEN parametry + aplikovat do hry', value=False).classes('w-full'):
-                        turn = ui.radio({'w': 'Bílý na tahu', 'b': 'Černý na tahu'}, value='w').props('inline')
-                        castling = ui.input('Rokáda (KQkq / -)', value='-').classes('mono')
-                        ep = ui.input('En-passant (e3 / -)', value='-').classes('mono')
-                        halfmove = ui.number('Halfmove', value=0, min=0, max=200).classes('w-40')
-                        fullmove = ui.number('Fullmove', value=1, min=1, max=999).classes('w-40')
+                    # ŠACHOVNICE
+                    ui.html('<div id="cg-board" class="cg-board"></div>', sanitize=False)
 
-                        fen_preview = ui.label().classes('mono text-caption mt-2')
+                    ui.separator().classes('my-2')
 
-                        def update_fen_preview() -> str:
-                            full_fen = build_full_fen(
-                                placement=state.editor_placement,
-                                turn=turn.value,
-                                castling=castling.value,
-                                ep=ep.value,
-                                halfmove=int(halfmove.value or 0),
-                                fullmove=int(fullmove.value or 1),
-                            )
-                            fen_preview.set_text(full_fen)
-                            return full_fen
+                    # BÍLÉ POD ŠACHOVNICÍ
+                    ui.label('Bílé (táhni na šachovnici)').classes('text-caption')
+                    with ui.row().classes('spare-pieces justify-center'):
+                        for p, role in ROLE_MAP.items():
+                            ui.image(piece_svg('w', p)) \
+                                .classes('spare-piece') \
+                                .props('no-spinner') \
+                                .on('mousedown', js_handler=f'(e) => window.startDragNewPiece("white", "{role}", e)')
 
-                        for c in (turn, castling, ep, halfmove, fullmove):
-                            c.on('update:model-value', lambda _: update_fen_preview())
+                    # Ovládání editoru
+                    with ui.row().classes('w-full gap-2 mt-3'):
+                        ui.button('Základ', on_click=reset_start).classes('btn-ghost')
+                        ui.button('Prázdná', on_click=reset_empty).classes('btn-ghost')
+                        ui.button('Otočit', on_click=flip_board).classes('btn-ghost')
 
-                        def on_fen_update(e: events.GenericEventArguments) -> None:
-                            placement = e.args
-                            if isinstance(placement, str) and placement:
-                                state.editor_placement = placement
-                                update_fen_preview()
 
-                        ui.on('fen_update', on_fen_update)
-                        update_fen_preview()
 
-                        status_left = ui.label('—').classes('mono text-caption mt-2')
-
-                        def apply_editor_to_game() -> None:
-                            full_fen = update_fen_preview()
-                            try:
-                                state.game_board = chess.Board(full_fen)
-                                state.score_history.clear()
-                                status_left.set_text('Pozice aplikována do hry.')
-                                ui.notify('Pozice aplikována do hry.', type='positive')
-                            except Exception as ex:
-                                ui.notify(f'Neplatný FEN: {ex}', type='negative')
-
-                        ui.button('Aplikovat editor → hra', on_click=apply_editor_to_game).classes('btn-primary w-full mt-2')
 
             # =========================
             # RIGHT PANEL (controls/output)
@@ -311,3 +257,55 @@ def build_ui() -> None:
                         ui.button('Analyzovat', on_click=analyze_only).classes('btn-primary grow')
                         ui.button('Zahrát tah', on_click=play_one_best_move).classes('btn-ghost grow')
                         ui.button('Start/Stop self-play', on_click=toggle_self_play).classes('btn-danger grow')
+
+
+                # FEN params in an expansion (reduces scrolling)
+                with ui.card().classes('panel-card mt-3'):
+                    with ui.expansion('FEN parametry + aplikovat do hry', value=False).classes('w-full'):
+                        turn = ui.radio({'w': 'Bílý na tahu', 'b': 'Černý na tahu'}, value='w').props('inline')
+                        castling = ui.input('Rokáda (KQkq / -)', value='-').classes('mono')
+                        ep = ui.input('En-passant (e3 / -)', value='-').classes('mono')
+                        halfmove = ui.number('Halfmove', value=0, min=0, max=200).classes('w-40')
+                        fullmove = ui.number('Fullmove', value=1, min=1, max=999).classes('w-40')
+
+                        fen_preview = ui.label().classes('mono text-caption mt-2')
+
+                        def update_fen_preview() -> str:
+                            full_fen = build_full_fen(
+                                placement=state.editor_placement,
+                                turn=turn.value,
+                                castling=castling.value,
+                                ep=ep.value,
+                                halfmove=int(halfmove.value or 0),
+                                fullmove=int(fullmove.value or 1),
+                            )
+                            fen_preview.set_text(full_fen)
+                            return full_fen
+
+                        for c in (turn, castling, ep, halfmove, fullmove):
+                            c.on('update:model-value', lambda _: update_fen_preview())
+
+                        def on_fen_update(e: events.GenericEventArguments) -> None:
+                            placement = e.args
+                            if isinstance(placement, str) and placement:
+                                state.editor_placement = placement
+                                update_fen_preview()
+
+                        ui.on('fen_update', on_fen_update)
+                        update_fen_preview()
+
+                        status_left = ui.label('—').classes('mono text-caption mt-2')
+
+                        def apply_editor_to_game() -> None:
+                            full_fen = update_fen_preview()
+                            try:
+                                state.game_board = chess.Board(full_fen)
+                                state.score_history.clear()
+                                status_left.set_text('Pozice aplikována do hry.')
+                                ui.notify('Pozice aplikována do hry.', type='positive')
+                            except Exception as ex:
+                                ui.notify(f'Neplatný FEN: {ex}', type='negative')
+
+                        ui.button('Aplikovat editor → hra', on_click=apply_editor_to_game).classes('btn-primary w-full mt-2')
+
+                

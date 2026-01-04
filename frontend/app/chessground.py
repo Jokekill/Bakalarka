@@ -15,8 +15,8 @@ ROLE_MAP = {
 
 
 def piece_svg(color: str, p: str) -> str:
-    # Lichess cburnett pieces
-    return f'https://lichess1.org/assets/piece/cburnett/{color}{p.lower()}.svg'
+    # Files expected: wK.svg, wQ.svg, wR.svg, wB.svg, wN.svg, wP.svg and black variants.
+    return f'/static/{color}{p}.svg'
 
 
 def inject_chessground_assets() -> None:

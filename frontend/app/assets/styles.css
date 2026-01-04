@@ -148,3 +148,40 @@ body {
 @media (max-width: 520px) {
   :root { --board: 92vw; }
 }
+
+/* vycentrování celého layoutu */
+.app-shell{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+/* širší 2-sloupcový grid */
+.app-grid{
+  width: min(1600px, 100%);
+  display: grid;
+  grid-template-columns: minmax(560px, 1fr) minmax(560px, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+/* mobil / menší šířky -> sloupce pod sebe */
+@media (max-width: 1200px){
+  .app-grid{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* aby se palety hezky skládaly */
+.spare-pieces{
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* velikost figurek v paletě (uprav dle chuti) */
+.spare-piece{
+  width: 34px;
+  height: 34px;
+}
+
