@@ -18,3 +18,28 @@ services:
       - CHESSGROUND_VERSION=8.2.0
     depends_on:
       - backend
+
+
+  # NOVÝ Player Frontend - GPT
+  game:
+    build: ./game_frontend
+    container_name: r-chess-game-frontend
+    ports:
+      - "8081:8081"
+    environment:
+      - ENGINE_URL=http://backend:8000/analyze
+      - CHESSGROUND_VERSION=8.2.0
+    depends_on:
+      - backend
+
+  # NOVÝ Player Frontend - GEMINI
+  player_frontend:
+    build: ./player_frontend
+    container_name: r-chess-player-frontend
+    ports:
+      - "8082:8082"  # Mapujeme interní 8080 na externí 8081
+    environment:
+      # URL k backendu v rámci Docker sítě
+      - ENGINE_URL=http://backend:8000/analyze
+    depends_on:
+      - backend
