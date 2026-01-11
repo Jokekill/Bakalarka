@@ -33,7 +33,7 @@ class GameState:
     white_time: int = BASE_ENGINE_TIME
 
     sim_running: bool = False
-    ignore_fen_events: bool = False  # <- KLÍČ: ignorovat fen_update při simulaci / programatickém cgSetFen
+    ignore_fen_events: bool = False  # ignorovat fen_update při simulaci / programatickém cgSetFen
     moves: List[str] = field(default_factory=list)
 
 
@@ -151,36 +151,42 @@ def build_ui() -> None:
         if time_val_label:
             time_val_label.set_text(f"Čas: {state.white_time} s")
 
+    def _set_btn_enabled(btn, enabled: bool) -> None:
+        """Správné povolení/zakázání Quasar tlačítek v NiceGUI (bez props('disabled=false'))."""
+        if not btn:
+            return
+        if enabled:
+            btn.enable()
+        else:
+            btn.disable()
+        btn.update()
+
     def set_controls_enabled(enabled: bool) -> None:
-        disabled = "false" if enabled else "true"
+        # Pozn.: plus tlačítka se po enable ještě dořeší v refresh_affordability()
         for btn in (next_button, reset_button, depth_minus_button, depth_plus_button, time_minus_button, time_plus_button):
-            if btn:
-                btn.props(f"disabled={disabled}")
-                btn.update()
+            _set_btn_enabled(btn, enabled)
 
     def refresh_affordability() -> None:
+        # Plus tlačítka mají vlastní logiku podle budgetu + sim_running
+        nonlocal depth_plus_button, time_plus_button
         if not depth_plus_button or not time_plus_button:
             return
 
         if state.sim_running:
-            depth_plus_button.props("disabled=true").update()
-            time_plus_button.props("disabled=true").update()
+            _set_btn_enabled(depth_plus_button, False)
+            _set_btn_enabled(time_plus_button, False)
             return
 
-        if money_left() < DEPTH_COST or state.white_depth >= 30:
-            depth_plus_button.props("disabled=true")
-        else:
-            depth_plus_button.props("disabled=false")
-        depth_plus_button.update()
+        # Depth +
+        can_depth = (money_left() >= DEPTH_COST) and (state.white_depth < 30)
+        _set_btn_enabled(depth_plus_button, can_depth)
 
-        if money_left() < TIME_COST:
-            time_plus_button.props("disabled=true")
-        else:
-            time_plus_button.props("disabled=false")
-        time_plus_button.update()
+        # Time +
+        can_time = (money_left() >= TIME_COST)
+        _set_btn_enabled(time_plus_button, can_time)
 
     # -------------------------
-    # Board FEN (programatic) - KLÍČOVÉ
+    # Board FEN (programatic)
     # -------------------------
     async def set_board_fen(client, placement_fen: str) -> None:
         """Nastaví šachovnici programově a dočasně ignoruje fen_update validace."""
@@ -442,18 +448,15 @@ def build_ui() -> None:
             sync_labels()
             refresh_affordability()
 
-            # HARD re-enable (spolehlivé i když Quasar/NiceGUI někdy "ztratí" update během async)
-            if next_button:
-                next_button.props("disabled=false")
-                next_button.update()
+            # HARD re-enable (spolehlivé i když frontend někdy ztratí update během async)
+            _set_btn_enabled(next_button, True)
+            refresh_affordability()
 
             if moves_log:
                 moves_log.push(f"== Připravte se na úroveň {state.current_level} ==")
 
-
-
     # -------------------------
-    # Layout podle PNG
+    # Layout
     # -------------------------
     with ui.header().classes("app-header"):
         ui.label("Chess Rogue like").classes("app-title")

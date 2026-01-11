@@ -33,13 +33,13 @@ services:
       - backend
 
   # NOVÝ Player Frontend - GEMINI
-  player_frontend:
-    build: ./player_frontend
-    container_name: r-chess-player-frontend
-    ports:
-      - "8082:8082"  # Mapujeme interní 8080 na externí 8081
-    environment:
-      # URL k backendu v rámci Docker sítě
-      - ENGINE_URL=http://backend:8000/analyze
-    depends_on:
-      - backend
+  #player_frontend:
+  #  build: ./player_frontend
+  #  container_name: r-chess-player-frontend
+  #  ports:
+  #    - "8082:8082"  # Mapujeme interní 8080 na externí 8081
+  #  environment:
+  #    # URL k backendu v rámci Docker sítě
+  #    - ENGINE_URL=http://backend:8000/analyze
+  #  depends_on:
+  #    - backend
