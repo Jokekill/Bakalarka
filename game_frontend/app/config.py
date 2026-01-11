@@ -12,9 +12,9 @@ HOST = os.getenv('HOST', '0.0.0.0')
 PORT = int(os.getenv('PORT', '8081'))
 
 # Game settings
-INITIAL_MONEY = 10  # Starting budget for level 1
-BASE_ENGINE_DEPTH = 3  # Base depth (free) for player's engine
-BASE_ENGINE_TIME = 0   # Base time (free seconds) for player's engine
+INITIAL_MONEY = 25  # Starting budget for level 1
+BASE_ENGINE_DEPTH = 10  # Base depth (free) for player's engine
+BASE_ENGINE_TIME = 3   # Base time (free seconds) for player's engine
 DEPTH_COST = 1  # Cost in money per +1 depth
 TIME_COST = 1   # Cost in money per +1 second of think time
 

@@ -442,6 +442,16 @@ def build_ui() -> None:
             sync_labels()
             refresh_affordability()
 
+            # HARD re-enable (spolehlivé i když Quasar/NiceGUI někdy "ztratí" update během async)
+            if next_button:
+                next_button.props("disabled=false")
+                next_button.update()
+
+            if moves_log:
+                moves_log.push(f"== Připravte se na úroveň {state.current_level} ==")
+
+
+
     # -------------------------
     # Layout podle PNG
     # -------------------------
